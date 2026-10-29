@@ -106,3 +106,21 @@ def delete_exercise(id):
     db.session.delete(exercise)  # cascades to its WorkoutExercises
     db.session.commit()
     return '', 204
+
+
+@app.route(
+    '/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises',
+    methods=['POST'],
+)
+def add_exercise_to_workout(workout_id, exercise_id):
+    workout = get_or_404(Workout, workout_id)
+    exercise = get_or_404(Exercise, exercise_id)
+    data = workout_exercise_input_schema.load(request.get_json(silent=True) or {})
+    workout_exercise = WorkoutExercise(workout=workout, exercise=exercise, **data)
+    db.session.add(workout_exercise)
+    db.session.commit()
+    return jsonify(workout_exercise_schema.dump(workout_exercise)), 201
+
+
+if __name__ == '__main__':
+    app.run(port=5555, debug=True)
