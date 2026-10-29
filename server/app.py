@@ -79,3 +79,30 @@ def delete_workout(id):
     db.session.delete(workout)  # cascades to its WorkoutExercises
     db.session.commit()
     return '', 204
+
+
+@app.route('/exercises', methods=['GET'])
+def get_exercises():
+    return jsonify(exercises_schema.dump(Exercise.query.all())), 200
+
+
+@app.route('/exercises/<int:id>', methods=['GET'])
+def get_exercise(id):
+    return jsonify(exercise_schema.dump(get_or_404(Exercise, id))), 200
+
+
+@app.route('/exercises', methods=['POST'])
+def create_exercise():
+    data = exercise_schema.load(request.get_json(silent=True) or {})
+    exercise = Exercise(**data)
+    db.session.add(exercise)
+    db.session.commit()
+    return jsonify(exercise_schema.dump(exercise)), 201
+
+
+@app.route('/exercises/<int:id>', methods=['DELETE'])
+def delete_exercise(id):
+    exercise = get_or_404(Exercise, id)
+    db.session.delete(exercise)  # cascades to its WorkoutExercises
+    db.session.commit()
+    return '', 204
